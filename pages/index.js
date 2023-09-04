@@ -11,10 +11,12 @@ import Searchbar from '@/components/Searchbar'
 import Storage from '@/components/Storage'
 import { useContext } from 'react'
 import { ParentFolderIdContext } from '@/context/ParentFolderIdContext'
+import FileList from '../components/FileList'
 
 const index = () => {
   const { data: session } = useSession()
   const [folderList, setFolderList] = useState([])
+  const [fileList, setFileList] = useState([])
   const { parentFolderId, setParentFolderId } = useContext(ParentFolderIdContext)
 
   useEffect(() => {
@@ -23,6 +25,7 @@ const index = () => {
     }
     else {
       getFolderList()
+      getFileList()
       console.log("user Session", session)
     }
     setParentFolderId(0)
@@ -42,6 +45,20 @@ const index = () => {
     })
   }
 
+  const getFileList = async () => {
+    setFileList([])
+    const q = query(collection(db, "files"),
+      where("createBy", "==", session.user.email))
+
+
+    const querySnapshot = await getDocs(q)
+    querySnapshot.forEach((doc) => {
+      console.log([...fileList, doc.data()])
+      setFileList(fileList => ([...fileList, doc.data()]))
+
+    })
+  }
+
   return (
     <div className='bg-blue-50  w-full sm:flex'>
       <div className=''>
@@ -52,6 +69,7 @@ const index = () => {
       <div className='sm:p-10 p-5 w-auto'>
         <Searchbar />
         <FolderList folderList={folderList} />
+        <FileList fileList={fileList} />
       </div>
 
       <div className=''>

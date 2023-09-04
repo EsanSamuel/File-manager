@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react'
 import { doc, getFirestore, setDoc } from 'firebase/firestore'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import FolderList from '@/components/FolderList'
+import FileList from '@/components/FileList'
 
 const folderDetails = () => {
     const { data: session } = useSession()
@@ -15,13 +16,16 @@ const folderDetails = () => {
     const { name, id } = router.query
     const { parentFolderId, setParentFolderId } = useContext(ParentFolderIdContext)
     const [folderList, setFolderList] = useState([])
+    const [fileList, setFileList] = useState([])
 
     useEffect(() => {
         setParentFolderId(id)
 
         if (session) {
             getFolderList()
+            getFileLists()
         }
+
     }, [id, session]);
 
     const db = getFirestore(app)
@@ -39,6 +43,23 @@ const folderDetails = () => {
             setFolderList(folderList => ([...folderList, doc.data()]))
 
         })
+
+    }
+
+    const getFileLists = async () => {
+        setFileList([])
+        const q = query(collection(db, 'files'),
+            where("createBy", "==", session.user.email),
+            where('parentFolderId', "==", id))
+
+
+
+        const querySnapshot = await getDocs(q)
+        querySnapshot.forEach((doc) => {
+            console.log(doc.id, "=>", doc.data())
+            setFileList(fileList => ([...fileList, doc.data()]))
+
+        })
     }
 
     return (
@@ -50,6 +71,7 @@ const folderDetails = () => {
                 <Searchbar />
                 <h1 className='font-bold text-[25px] pb-5'>{name}</h1>
                 <FolderList folderList={folderList} />
+                <FileList fileList={fileList} />
 
 
             </div>

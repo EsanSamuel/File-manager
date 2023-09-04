@@ -16,12 +16,10 @@ const FolderList = ({ folderList }) => {
                 id: list.id
             }
         })
-
-
     }
 
     return (
-        <div className='bg-white box rounded p-5 w-auto'>
+        <div className='bg-white box rounded p-5 w-auto min-w-full'>
             <h1 className='text-[20px] font-bold'>Recents Folders</h1>
             {folderList?.length > 0 ? (
                 <div className='grid sm:grid-cols-5 grid-cols-2 gap-2 pt-5' >
